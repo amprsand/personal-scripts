@@ -3,7 +3,7 @@
 
 version: "2.1"
 networks:
-  default: home
+  default: host
 services:
   environment:
     - STORAGE='/path/to/storage'
@@ -47,9 +47,9 @@ services:
       - PGID=1000
       - TZ=Europe/London
     volumes:
-      - /path/to/data:/config
-      - /path/to/movies:/movies #optional
-      - /path/to/downloadclient-downloads:/downloads #optional
+      - /home/radarr-docker/.config/radarr:/config
+      - ${STORAGE]/movies:/movies #optional
+      - ${STORAGE}/torrents:/downloads #optional
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -65,8 +65,8 @@ services:
       - AUTO_UPDATE=true #optional
       - "RUN_OPTS=<run options here>" #optional
     volumes:
-      - <path to data>:/config
-      - :/downloads:ro
+      - /home/jackett-docker/.config/jackett:/config
+      - /downloads::ro
     ports:
       - 9117:9117
     restart: unless-stopped
@@ -81,10 +81,12 @@ services:
       - PGID=1000
       - VERSION=docker
       - PLEX_CLAIM= #optional
+      - PLEX_DB='/srv/dev-disk-by-/plexmediaserver'
     volumes:
-      - /path/to/library:/config
-      - /path/to/tvseries:/tv
-      - /path/to/movies:/movies
+      - ${PLEX_DB}:/config
+      - ${STORAGE}:/data
+      - /opt/plexcodecs/Codecs:/config/Library/Application Support/Plex Media Server/Codecs
+      - /transcode::ro
     restart: unless-stopped
 
 # transmission
@@ -96,15 +98,14 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
       - TRANSMISSION_WEB_HOME= #optional
-      - USER=username #optional
+      - USER=brenden #optional
       - PASS=password #optional
-      - WHITELIST=iplist #optional
+      - WHITELIST="" #optional
       - PEERPORT=peerport #optional
       - "HOST_WHITELIST=dnsname list" #optional
     volumes:
-      - /path/to/data:/config
-      - /path/to/downloads:/downloads
-      - /path/to/watch/folder:/watch
+      - /home/debian-transmission/transmission-daemon:/config
+      - ${STORAGE}:/downloads
     ports:
       - 9091:9091
       - 51413:51413
@@ -119,8 +120,10 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
+      - PLEX_DB='/srv/dev-disk-by-/plexmediaserver'
     volumes:
-      - <path to data>:/config
+      - /home/tautulli-docker/.config/tautulli:/config
+      - ${PLEX_DB}/Library/Application Support/Plex Media Server/Logs:/logs
     ports:
       - 8181:8181
     restart: unless-stopped
